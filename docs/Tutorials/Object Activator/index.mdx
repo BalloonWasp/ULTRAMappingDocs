@@ -1,5 +1,5 @@
 ---
-title: Object Activator
+title: Object Activators and Triggers
 sidebar_position: 5
 ---
 # Object activator and what they do.
@@ -55,6 +55,10 @@ Requires a Game Object that has an Object Activation Check component on it, func
 
 ### For Enemies
 If the Game Object that has an Object Activator also has a trigger on it, it will only be able to be triggered by enemies.
+
+## Basic Triggers
+
+In order to create a basic trigger, first, create an empty gameobject. Afterwards, give it a Box Collider component and check the Is Trigger field. Now you can add Object Activator and use it, or directly add a component you want to activate to the gameobject. For ease of use, you can add Mesh Rendered component, add a material to it, set the layer to Invisible and save it as a prefab. 
 
 ---
 
