@@ -3,33 +3,7 @@ import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
 const FeatureList = [
-  {
-    title: 'Fully public',
 
-    description: (
-      <>
-        Solaris Documentation project is public to everyone and the software is available on GitHub
-      </>
-    ),
-  },
-  {
-    title: 'Learn how to create levels',
-
-    description: (
-      <>
-        Here you will learn how to create levels for ULTRAKILL from start to finish!
-      </>
-    ),
-  },
-  {
-    title: 'Aimed towards simplicity',
-
-    description: (
-      <>
-        The documentation was made to be understandable by everyone. Both new creators and veterans of Rude LE.
-      </>
-    ),
-  },
 ];
 
 function Feature({title, description}) {

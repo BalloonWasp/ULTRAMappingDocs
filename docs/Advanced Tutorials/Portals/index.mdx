@@ -2,9 +2,13 @@
 title: Portals(Redirect)
 ---
 
-<meta http-equiv="refresh" content="0; url=https://github.com/BalloonWasp/unofficial_ultrakill_portal_wiki/wiki"></meta>
-{
-window.location.replace("https://github.com/BalloonWasp/unofficial_ultrakill_portal_wiki/wiki")
-}
-
 This is a redirect page. If it did not automatically redirect you, [click here](https://github.com/BalloonWasp/unofficial_ultrakill_portal_wiki/wiki).
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+<BrowserOnly>
+  {() => {
+    window.location.href = "https://github.com/BalloonWasp/unofficial_ultrakill_portal_wiki/wiki";
+    return null;
+  }}
+</BrowserOnly>
