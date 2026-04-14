@@ -4,78 +4,68 @@ sidebar_position: 4
 ---
 # Checkpoints
 
-Checkpoints are very important, as they let the player to start from a certain point in the level, rather than forcing to restart from start. However, they require a certain configuration in order to work properly and can bre confusing at a first glance. In this page you will learn how to properly set them up.
+*Prefab found at `Assets/ULTRAKILL Assets/Prefabs/Levels/` `Checkpoint` & `CheckpointReusable`*
 
-There are 2 types of checkpoints: Non-Reusable and Reusable. Reusable checkpoints can be used multiple times(for example: 4-2). Checkpoints can be found in `ULTRAKILL Assets/Prefabs/Level/(Checkpoint.prefab or CheckpointReuseable.prefab)`
+Checkpoints allow a player to start over an arena or segment, but how does this work internally?
 
-## Setup
+> *A Checkpoint is given Stuff to clone, and when the player resets to a Checkpoint, it restores what was cloned.*
+
+It is also important to know that: if the Checkpoint spits you into the void, *you did something wrong!*
+
+---
+
+## Basic Usage
+
+Out of the box, Checkpoints need little setup:
+
+- `To Activate` - the room object the Checkpoint is for. Think of it as the room object that is enabled if you were to teleport to it through the Teleport Menu cheat.
+- `Rooms` - a list of Stuff that is cloned when the *level loads*, saving the default state of Stuff.
+- `Rooms To Inherit` -  a list of Stuff that is cloned when the *Checkpoint is grabbed*, saving the state of Stuff when it's grabbed.
+- `Doors To Unlock` - doors that will be unlocked when the player restarts to this Checkpoint. Usually, if an arena locks doors found in Stuff, put those doors here as well, or else you'll get stuck.
+
+If your Checkpoint is *non-reusable (one time)*, put your Stuff in `Rooms`!
+
+If your Checkpoint is *reusable (multi-use)*, put your Stuff in `Rooms To Inherit`!
+
+Between `Rooms` and `Rooms To Inherit`, you only need to fill *one* of those in, never both.
 
 :::note
-Here, a big part of the checkpoint settings will be skipped since they are rarely used. Instead, we will focus on the most used and required settings.
+It is important that you *only* put Stuff objects (the ones with the `GoreZone` component) into either `Rooms` or `Rooms To Inherit` depending on your use case. Putting other objects *without* the `GoreZone` component may cause issues.
 :::
 
-1. To Activate: Any object that is placed in that field will be activated when the checkpoint is hit. This is usually used for activating rooms that were disabled for optimization purposes, however, you can use it for more advanced level logic.
-2. Rooms To Inherit: Everything in `Rooms To Inherit` is saved when the checkpoint is hit. Use this for... most stuff, really..
-3. Rooms: Everything in Rooms is saved immediately upon level load. Use this for stuff that can't possibly be affected before hitting the checkpoint. Reusable checkpoints likely won't make much use of Rooms.\
-4. Doors To Unlock: Unlocks doors after the player respawns. Set `Doors To Unlock` to unlock any doors to enemy arenas where you could have reloaded the checkpoint. Otherwise, the player won't be able to get back to the arena(or any other place of death).
+In your level hierarchy, Checkpoints should always *split* between rooms.
 
-:::caution
- For `Rooms To Inherit`, it is recommended to use only `Stuff`, as placing the whole room in there will not deactivate enemies that are in these rooms. If your room does not have any enemies inside, it is safe to put the whole room in the field.
-:::
+- 1 - MyRoomFirst
+- Checkpoint *(would clone Stuff found under MyRoomSecond)*
+- 2 - MyRoomSecond
 
-Now, when the checkpoint is hit and player dies, it will reset the wave and the room will stay.
+The Checkpoint's local +Z direction is where the player will be facing when respawned.
 
-## Functionality
-<img align="right" src={require('./assets/Checkpoint.png').default} 
-alt="checkpoint settings" width="50%" height="50%" ></img>
+---
 
-Here, is a more technical documentation of what Checkpoints are capable of doing.
+## Troubleshooting
 
-* Force Off
-	* Forcefully turns the checkpoint off.
-	* Ideal to use this over just deactivating the checkpoint, as it can break checkpoints otherwise if 2 reset the same object.
-   	* Use the `SetForceOff()` event to turn this on/off on runtime.
-* Rooms
-	* List of objects to be reset <i><b>on the level being loaded</b></i>.
-* Rooms To Inherit
-	* List of objects to be reset <i><b>on the checkpoint being hit</b></i>.
+Checkpoints are very tempermental, but here are some pointers if you're having issues!
 
-:::tip
-Wrong placement of an object between `Rooms` and `Rooms To Inherit` is an easy way to cause a <b>Sequence Break</b> in a level, where you can trigger certain events under conditions that aren't intended. Think about what you're resetting and how it can be abused by passing through the checkpoint at the wrong time(or not at all).
-:::
+- *Is your Checkpoint separate from any room in the hierarchy?*
+- *Is `ToActivate` filled in?*
+- *Is there at least 1 Stuff object in either `Rooms` or `RoomsToInherit`?*
+- *Are there **not** Stuff objects in **both** `Rooms` and `RoomsToInherit`?*
+  - *If there is (and you know what you're doing), are they **not** the same Stuff?*
+- *Are there no missing references in either the `Rooms` or `RoomsToInherit` lists?*
 
-:::caution
-References to objects in `Rooms` and `Rooms To Inherit` will break because the checkpoint activates clones of them on runtime. The `Arena Status`  script can solve issues between static/nonstuff -> gorezone.
-:::
+---
 
-* Doors To Unlock
-	* List of objects with `Door` script to be unlocked <i><b>on respawn</b></i>.
-* Multi Use
-	* Regenerates the checkpoint after going through it (Use the `CheckpointReusable` prefab).
-* Dont Auto Reset
-	* Prevents the checkpoint from immediately activating(in cases where you'd want to call the `ResetRoom()` and `InheritRoom()` events manually).
-* Start Off
-	* Checkpoint object is deactivated on scene load.
-* Unteleportable
-	* Removes checkpoint from list of checkpoints to teleport to in the cheats menu.
-* Invisible
-	* Hides checkpoint graphic.
-	* Can be toggled on runtime with `SetForceOff()` event.
-* On Restart()
-	* List of UnityEvents to be called when the player respawns.
+## Fields
 
-:::caution
-Checkpoints can only be parented to empty objects at `0,0,0` position.
-:::
-
-## Pitfalls
-
-Checkpoints can break if they dont have the following:
-* Object in `To Activate:
-	* There must be a gorezone on your object.
-* Object in `Rooms` <b>OR</b> `Rooms to Inherit`:
-	* There must be gorezones on each of your objects in `Rooms` or `Rooms to Inherit`.
- 	* Objects cannot contain other checkpoints in them.
-:::warning
-In some cases, having <a href="https://docs.unity3d.com/Manual/StaticObjects.html">static flags</a> on an object that gets reset can cause issues with the checkpoint. Generally, if an object has static flags, it shouldn't be changing and need to be reset in the first place.
-:::
+- `Inherit All Rooms` - this treats every `GoreZone` (Stuff) in the level as if it was under `Rooms To Inherit`
+- `Unlock All Doors` - this treats every `Door` in the level as if it was under `Doors To Unlock`
+- `Doors To Ignore` - when unlocking doors with specifically `Unlock All Doors` set to true, do not unlock these doors
+- `Reset On Get Other Checkpoint` - if another Checkpoint is grabbed, re-enable this Checkpoint to be grabbable (even if it's non-reusable!)
+- `Reset On Distance` - using `Auto Reset Distance`, re-enable this Checkpoint if the player has exceeded	 that distance
+- `Start Off` - sets the Checkpoint to a state as if it was grabbed
+- `Force Off` - overrides all logic of this Checkpoint being able to be re-enabled (`Reset On Get Other Checkpoint`, `Reset On Distance`, etc.), and has to be set on manually via `SetForceOff(bool state)` function
+- `Disable During Combat` - disallows this Checkpoint to be grabbable if combat is active
+- `Unteleportable` - remove this Checkpoint from the Teleport Menu cheat list
+- `Invisible` - hides the pink graphic, but the Checkpoint is still grabbable
+- `OnRestart()` - a list of UnityEvents to be called when the player resets to this Checkpoint
